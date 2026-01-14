@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Collective | Premium Global Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0B0F1A; color: white; overflow-x: hidden; }
+        .page-section { display: none; min-height: 100vh; animation: fadeIn 0.4s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-active { color: #00D4FF !important; border-bottom: 2px solid #00D4FF; }
+        .glass { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .glass:hover { border-color: rgba(0, 212, 255, 0.3); }
+        .chat-btn { position: fixed; bottom: 30px; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 1000; transition: 0.3s; }
+        .whatsapp { right: 30px; background-color: #25D366; }
+        .filter-btn.active { background-color: #00D4FF; color: black; }
+        .social-link:hover { transform: translateY(-5px); color: #00D4FF; }
+        /* Image Animation */
+        .animated-image {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: imageAppear 1s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes imageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typing Text Animation */
+        #typing-text {
+            display: inline-block;
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden; /* Hide the overflowing text */
+            border-right: .15em solid orange; /* The caret */
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00D4FF; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="order-timer-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+    <div class="glass p-8 rounded-[2rem] text-center max-w-sm w-full border border-white/10">
+        <div class="relative w-20 h-20 mx-auto mb-4">
+            <svg class="w-full h-full" viewBox="0 0 36 36">
+                <path class="stroke-gray-800" fill="none" stroke-width="3" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path id="timer-progress" class="stroke-[#00D4FF] transition-all duration-1000" fill="none" stroke-width="3" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <div id="timer-number" class="absolute inset-0 flex items-center justify-center font-black text-xl">30</div>
+        </div>
+        <h3 class="text-lg font-bold mb-2">Item Added!</h3>
+        <p class="text-gray-400 text-xs mb-6">Redirecting to Checkout in 5 seconds...</p>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="cancelOrderTimer()" class="bg-red-500/10 text-red-500 py-3 rounded-xl text-[10px] font-black uppercase border border-red-500/20 hover:bg-red-500 hover:text-white transition">Cancel</button>
+           <button onclick="clearInterval(orderTimer); document.getElementById('order-timer-modal').classList.add('hidden'); navigateTo('checkout');" class="bg-[#00D4FF] text-black py-3 rounded-xl text-[10px] font-black uppercase hover:bg-white transition">
+    Order Now
+</button>
+        </div>
+    </div>
+</div>
+
+    <div id="specialty-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-5" onclick="closeSpecialtyModal()">
+        <div class="glass p-10 rounded-[3rem] relative text-center max-w-xl w-full border border-white/10" onclick="event.stopPropagation()">
+            <button onclick="closeSpecialtyModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white">
+                <i data-lucide="x"></i>
+            </button>
+            <div id="spec-icon" class="text-[#00D4FF] mb-6 flex justify-center"></div>
+            <h2 id="spec-title" class="text-3xl font-black italic uppercase mb-4 text-white tracking-tight"></h2>
+            <p id="spec-desc" class="text-gray-400 leading-relaxed mb-8 text-base font-medium"></p>
+            <button id="spec-wa-btn" class="w-full bg-[#00D4FF] text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-white transition duration-300">Contact for Details</button>
+        </div>
+    </div>
+
+    <a href="https://wa.me/8801700949457" target="_blank" class="chat-btn whatsapp">
+    <i data-lucide="message-circle"></i>
+    </a>
+
+    <nav class="flex justify-between items-center px-6 md:px-16 py-5 sticky top-0 bg-[#0B0F1A]/95 backdrop-blur-md z-[100] border-b border-white/5">
+        <div class="flex items-center gap-4 cursor-pointer" onclick="navigateTo('home')">
+          <img src="logo.png" alt="Logo" class="w-16 h-16 md:w-24 md:h-24 rounded-2xl border-2 border-cyan-500/50 object-contain shadow-lg shadow-cyan-500/10">
+            <span class="text-xl font-black uppercase tracking-tighter">FF COLLECTIVE</span>
+        </div>
+        <div class="hidden md:flex space-x-8 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+            <button onclick="navigateTo('home')" class="nav-btn nav-active" id="btn-home">Home</button>
+            <button onclick="navigateTo('shop')" class="nav-btn" id="btn-shop">Shop</button>
+            <button onclick="navigateTo('services')" class="nav-btn" id="btn-services">Services</button>
+            <button onclick="navigateTo('contact')" class="nav-btn" id="btn-contact">Contact</button>
+        </div>
+        <div class="flex items-center gap-5">
+    <div class="relative cursor-pointer" onclick="navigateTo('checkout')">
+        <i data-lucide="shopping-cart"></i>
+        <span id="cart-count" ...>0</span>
+    </div>
+    <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+</div>
+    </nav>
+    </nav> <div id="mobile-menu" class="hidden md:hidden fixed top-[80px] left-0 w-full bg-[#0B0F1A]/95 backdrop-blur-md border-b border-white/10 z-[90] p-6 space-y-4 shadow-2xl">
+        <button onclick="navigateTo('home'); toggleMobileMenu()" class="block w-full text-left text-sm font-bold uppercase tracking-widest text-gray-400">Home</button>
+        <button onclick="navigateTo('shop'); toggleMobileMenu()" class="block w-full text-left text-sm font-bold uppercase tracking-widest text-gray-400">Shop</button>
+        <button onclick="navigateTo('services'); toggleMobileMenu()" class="block w-full text-left text-sm font-bold uppercase tracking-widest text-gray-400">Services</button>
+        <button onclick="navigateTo('contact'); toggleMobileMenu()" class="block w-full text-left text-sm font-bold uppercase tracking-widest text-gray-400">Contact</button>
+    </div>
+
+  <section id="page-home" class="page-section active-section">
+        <div class="px-6 md:px-16 py-20 flex flex-col md:flex-row items-center gap-10">
+            <div class="md:w-1/2 space-y-6 text-center md:text-left">
+                <h1 class="text-3xl md:text-5xl font-black italic uppercase leading-none">
+    Global <br><span class="text-[#00D4FF]">Import</span> Hub.
+</h1>
+                <div class="text-gray-400 max-w-md mx-auto md:mx-0 text-lg md:text-xl font-medium min-h-[4rem]">
+                   <span id="typing-text" class="text-white"></span>
+                    <div class="max-w-2xl mt-10 relative group mx-auto">
+    <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#00D4FF] transition-colors">
+        <i data-lucide="search" size="20"></i>
+    </div>
+    <input type="text" id="home-search" onkeyup="homeSearch(event)" placeholder="Search for gadgets, watches..." 
+        class="w-full bg-white/5 border border-white/10 pl-14 pr-6 py-5 rounded-[2rem] outline-none focus:border-[#00D4FF] focus:bg-white/10 transition-all text-lg shadow-2xl backdrop-blur-sm">
+    
+    <div class="absolute right-4 inset-y-0 flex items-center">
+        <span class="text-[10px] text-gray-500 uppercase tracking-widest hidden md:block">Press Enter</span>
+    </div>
+</div>
+                    <span class="animate-pulse text-[#00D4FF]">|</span>
+                </div>
+                <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                    <button onclick="navigateTo('shop')" class="bg-[#00D4FF] text-black px-10 py-4 rounded-full font-black uppercase text-xs hover:bg-white transition duration-300">Start Shopping</button>
+                    <button onclick="navigateTo('services')" class="border border-white/10 px-10 py-4 rounded-full font-black uppercase text-xs hover:bg-white/5 transition duration-300">Our Services</button>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="absolute inset-0 bg-cyan-500/10 blur-[80px] rounded-full"></div>
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800" class="relative rounded-[3rem] shadow-2xl border border-white/5 animated-image">
+            </div>
+        </div>
+
+        <div class="px-6 md:px-16 py-16 bg-[#0D121F]/50 border-t border-b border-white/5">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-2xl font-black uppercase italic">Featured <span class="text-[#00D4FF]">Collection</span></h2>
+                <button onclick="navigateTo('shop')" class="text-[#00D4FF] text-xs font-bold uppercase border-b border-[#00D4FF] hover:text-white hover:border-white transition duration-300">View All</button>
+            </div>
+            <div id="home-product-preview" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+
+        <div class="px-6 md:px-16 py-20">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-3xl font-black uppercase italic mb-4">Why <span class="text-[#00D4FF]">Choose Us?</span></h2>
+                <p class="text-gray-400 text-sm">We provide world-class logistics and personal shopping services to make global brands accessible in Bangladesh.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div onclick="openSpecialtyModal('cargo')" class="glass p-8 rounded-[2.5rem] cursor-pointer hover:border-cyan-500/50">
+                    <i data-lucide="plane-takeoff" class="mx-auto text-[#00D4FF] mb-4" size="32"></i>
+                    <h3 class="font-bold uppercase text-sm mb-2">Fast Air Cargo</h3>
+                    <p class="text-gray-500 text-xs">Weekly flights from USA & UK ensure 7-12 days delivery.</p>
+                </div>
+                <div onclick="openSpecialtyModal('quality')" class="glass p-8 rounded-[2.5rem] cursor-pointer hover:border-cyan-500/50">
+                    <i data-lucide="shield-check" class="mx-auto text-[#00D4FF] mb-4" size="32"></i>
+                    <h3 class="font-bold uppercase text-sm mb-2">Quality Check</h3>
+                    <p class="text-gray-500 text-xs">Each product is manually inspected before shipping.</p>
+                </div>
+                <div onclick="openSpecialtyModal('support')" class="glass p-8 rounded-[2.5rem] cursor-pointer hover:border-cyan-500/50">
+                    <i data-lucide="headphones" class="mx-auto text-[#00D4FF] mb-4" size="32"></i>
+                    <h3 class="font-bold uppercase text-sm mb-2">24/7 Support</h3>
+                    <p class="text-gray-500 text-xs">Direct WhatsApp support for all your queries.</p>
+                </div>
+            </div>
+        </div>
+<div class="px-6 md:px-16 py-20 bg-[#0D121F]/30 border-t border-white/5">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-3xl font-black uppercase italic mb-2">Happy <span class="text-[#00D4FF]">Customers</span></h2>
+        <p class="text-gray-500 text-xs tracking-widest uppercase">What they say about FF Collective</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass p-8 rounded-[2.5rem] relative group">
+            <div class="flex text-yellow-500 mb-4">
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+            </div>
+            <p class="text-gray-300 text-sm italic leading-relaxed mb-6">I bought an Apple Watch from Us. It was delivered in just 10 days, and the packaging was very good. Highly recommended!"</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#00D4FF]/20 flex items-center justify-center font-bold text-[#00D4FF]">R</div>
+                <div>
+                    <h4 class="font-bold text-xs uppercase">Rakibul Islam</h4>
+                    <p class="text-[10px] text-gray-500">Verified Buyer</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2.5rem] relative group border-cyan-500/20">
+            <div class="flex text-yellow-500 mb-4">
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+            </div>
+            <p class="text-gray-300 text-sm italic leading-relaxed mb-6">"I was worried about buying products from outside, but FF Collective's service is completely transparent. I got the original product."</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#00D4FF]/20 flex items-center justify-center font-bold text-[#00D4FF]">S</div>
+                <div>
+                    <h4 class="font-bold text-xs uppercase">Samiul Haque</h4>
+                    <p class="text-[10px] text-gray-500">Regular Client</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2.5rem] relative group">
+            <div class="flex text-yellow-500 mb-4">
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" fill="currentColor" size="14"></i>
+                <i data-lucide="star" size="14"></i>
+            </div>
+            <p class="text-gray-300 text-sm italic leading-relaxed mb-6">"কাস্টমার সাপোর্ট খুব ভালো, প্রতিটি স্টেপে আপডেট জানানো হয়েছে"</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#00D4FF]/20 flex items-center justify-center font-bold text-[#00D4FF]">A</div>
+                <div>
+                    <h4 class="font-bold text-xs uppercase">Anika Tabassum</h4>
+                    <p class="text-[10px] text-gray-500">Verified Buyer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="px-6 md:px-16 py-12 border-t border-white/5">
+            <div class="flex flex-col items-center">
+                <h3 class="text-sm font-black uppercase tracking-[0.3em] mb-8 text-gray-500">Connect With Us</h3>
+                <div class="flex gap-6">
+                    <a href="https://www.facebook.com/profile.php?id=61586602169892" target="_blank" class="glass social-link p-5 rounded-2xl transition-all">
+                        <i data-lucide="facebook"></i>
+                    </a>
+                    <a href="https://instagram.com" target="_blank" class="glass social-link p-5 rounded-2xl transition-all">
+                        <i data-lucide="instagram"></i>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" class="glass social-link p-5 rounded-2xl transition-all">
+                        <i data-lucide="twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-shop" class="page-section px-6 md:px-16 py-16">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
+            <div>
+                <h2 class="text-4xl font-black uppercase italic">Shop <span class="text-[#00D4FF]">Collection</span></h2>
+                <p class="text-gray-500 text-sm mt-2">Filter by category to find your needs.</p>
+            </div>
+            <div class="max-w-md mb-8 relative group">
+    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#00D4FF] transition-colors">
+        <i data-lucide="search" size="18"></i>
+    </div>
+    <input type="text" id="product-search" onkeyup="searchProducts()" placeholder="Search gadgets, watches, flasks..." 
+        class="w-full bg-white/5 border border-white/10 pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-[#00D4FF] focus:bg-white/10 transition-all text-sm">
+</div>
+            <div class="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                <button onclick="filterProducts('all')" class="filter-btn active px-5 py-2 rounded-lg text-[10px] font-bold uppercase transition" id="filter-all">All</button>
+                <button onclick="filterProducts('tech')" class="filter-btn px-5 py-2 rounded-lg text-[10px] font-bold uppercase transition" id="filter-tech">Tech</button>
+                <button onclick="filterProducts('lifestyle')" class="filter-btn px-5 py-2 rounded-lg text-[10px] font-bold uppercase transition" id="filter-lifestyle">Lifestyle</button>
+            </div>
+        </div>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </section>
+
+    <section id="page-services" class="page-section px-6 md:px-16 py-20 bg-[#0D121F]">
+        <h2 class="text-4xl font-black mb-12 uppercase italic text-center">Our <span class="text-[#00D4FF]">Specialties</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+            <div onclick="openSpecialtyModal('personal')" class="glass p-12 rounded-[3rem] cursor-pointer hover:border-cyan-500/50 transition">
+                <i data-lucide="shopping-cart" class="mx-auto mb-6 text-[#00D4FF]" size="48"></i>
+                <h3 class="text-2xl font-bold uppercase italic mb-4 tracking-tighter">Personal Shopping</h3>
+                <p class="text-gray-400 text-sm">If you see a product on a foreign website, give us the link and we will bring it to you.</p>
+            </div>
+            <div onclick="openSpecialtyModal('custom')" class="glass p-12 rounded-[3rem] cursor-pointer hover:border-cyan-500/50 transition">
+                <i data-lucide="box" class="mx-auto mb-6 text-[#00D4FF]" size="48"></i>
+                <h3 class="text-2xl font-bold uppercase italic mb-4 tracking-tighter">Custom Orders</h3>
+                <p class="text-gray-400 text-sm">Contact us for bulk orders or business imports.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-contact" class="page-section px-6 md:px-16 py-20">
+        <div class="max-w-4xl mx-auto glass p-10 md:p-16 rounded-[3rem]">
+            <h2 class="text-4xl font-black mb-6 uppercase text-center italic">Get In <span class="text-[#00D4FF]">Touch</span></h2>
+            <div class="space-y-4">
+                <input id="contact-name" type="text" placeholder="Your Name" class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF]">
+                <textarea id="contact-msg" placeholder="Tell us what you need..." class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none h-32 focus:border-[#00D4FF]"></textarea>
+                <button onclick="sendToWhatsApp()" class="w-full bg-[#00D4FF] text-black py-4 rounded-xl font-black uppercase tracking-widest">Send to WhatsApp</button>
+            </div>
+        </div>
+    </section>
+
+   <section id="page-checkout" class="page-section px-6 md:px-16 py-20">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+        
+        <div class="glass p-8 rounded-[2rem] space-y-6 h-fit border-white/10">
+            <h3 class="text-xl font-bold mb-4 text-[#00D4FF] flex items-center gap-2">
+                <i data-lucide="truck" size="20"></i> Delivery & Payment
+            </h3>
+            
+            <div class="space-y-3">
+                <input id="cust-name" type="text" placeholder="Full Name" class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF] transition">
+                <input id="cust-phone" type="text" placeholder="Phone Number" class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF] transition">
+                <textarea id="cust-addr" placeholder="Full Delivery Address" class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none h-24 focus:border-[#00D4FF] transition"></textarea>
+            </div>
+            
+            <div class="pt-2">
+                <p class="text-[11px] font-black uppercase text-gray-500 mb-4 tracking-[0.2em]">Delivery Location</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="location" value="60" class="hidden peer" checked onchange="updateUI()">
+                        <div class="peer-checked:border-[#00D4FF] peer-checked:bg-[#00D4FF]/10 border border-white/5 p-4 rounded-2xl text-center transition bg-white/5">
+                            <span class="block text-sm font-bold">Inside CTG</span>
+                            <span class="text-[10px] text-gray-400">Charge: ৳60</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="location" value="120" class="hidden peer" onchange="updateUI()">
+                        <div class="peer-checked:border-[#00D4FF] peer-checked:bg-[#00D4FF]/10 border border-white/5 p-4 rounded-2xl text-center transition bg-white/5">
+                            <span class="block text-sm font-bold">Outside CTG</span>
+                            <span class="text-[10px] text-gray-400">Charge: ৳120</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <p class="text-[11px] font-black uppercase text-gray-500 mb-4 tracking-[0.2em]">Select Payment Method</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="pay-method" value="bKash" class="hidden peer" checked>
+                        <div class="peer-checked:border-[#D12053] peer-checked:bg-[#D12053]/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition duration-300 bg-white/5">
+                            <img src="https://www.logo.wine/a/logo/BKash/BKash-Logo.wine.svg" class="h-8 w-auto filter grayscale peer-checked:grayscale-0 group-hover:grayscale-0 transition" alt="bKash">
+                            <span class="text-[10px] font-bold uppercase tracking-widest">bKash</span>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="pay-method" value="Nagad" class="hidden peer">
+                        <div class="peer-checked:border-[#F7941D] peer-checked:bg-[#F7941D]/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition duration-300 bg-white/5">
+                            <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" class="h-8 w-auto filter grayscale peer-checked:grayscale-0 group-hover:grayscale-0 transition" alt="Nagad">
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Nagad</span>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer group col-span-2">
+                        <input type="radio" name="pay-method" value="COD" class="hidden peer">
+                        <div class="peer-checked:border-[#00D4FF] peer-checked:bg-[#00D4FF]/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition duration-300 bg-white/5">
+                            <i data-lucide="truck" class="h-6 w-6 text-gray-500 peer-checked:text-[#00D4FF] group-hover:text-[#00D4FF] transition"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Cash on Delivery</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div id="txn-container" class="p-5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/10">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold">Send Money To:</p>
+                    <span class="text-[#00D4FF] font-black text-sm">01700949457</span>
+                </div>
+                <input id="cust-txnid" type="text" placeholder="Enter Transaction ID (TxnID)" class="w-full bg-black/40 border border-white/10 px-4 py-3 rounded-xl outline-none text-sm focus:border-[#00D4FF] placeholder:text-gray-600">
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2rem] h-fit border-white/10 sticky top-24">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="shopping-bag" size="20"></i> Order Summary
+            </h3>
+            
+            <div id="checkout-list" class="space-y-4 mb-8 text-sm text-gray-400 max-h-[200px] overflow-y-auto pr-2">
+                </div>
+            
+            <div class="pt-6 border-t border-white/10">
+                <div class="flex justify-between items-center mb-8">
+                    <span class="text-gray-500 font-bold uppercase text-xs">Total Amount</span>
+                    <span id="checkout-total" class="text-3xl font-black text-[#00D4FF]">৳0</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <button onclick="processOrder()" class="w-full bg-[#00D4FF] text-black py-5 rounded-2xl font-black uppercase tracking-[0.1em] hover:bg-white hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-[0_10px_30px_rgba(0,212,255,0.2)]">
+                        Confirm Order
+                    </button>
+                    
+                    <button onclick="cancelFullOrder()" class="w-full py-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2">
+                        <i data-lucide="trash-2" size="14"></i>
+                        Cancel & Clear Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+ <section id="page-product-details" class="page-section px-6 md:px-16 py-20">
+    <div class="max-w-6xl mx-auto">
+        <button onclick="navigateTo('shop')" class="text-[#00D4FF] mb-8 flex items-center gap-2 font-bold uppercase text-xs">
+            <i data-lucide="arrow-left" size="16"></i> Back to Shop
+        </button>
+        <div class="mt-10 border-t border-white/5 pt-10">
+    <h3 class="text-xl font-bold uppercase mb-4">Customer <span class="text-[#00D4FF]">Feedback</span></h3>
+    <button onclick="openReviewModal()" class="bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/30 px-6 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-[#00D4FF] hover:text-black transition-all">
+        Write a Review
+    </button>
+</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+            <div class="glass p-4 rounded-[3rem] border-white/10">
+                <img id="detail-img" src="" class="w-full h-[400px] object-cover rounded-[2.5rem]">
+            </div>
+            <div class="space-y-6">
+                <h2 id="detail-name" class="text-5xl font-black uppercase italic leading-none"></h2>
+                <p id="detail-price" class="text-3xl font-black text-[#00D4FF]"></p>
+                <p id="detail-desc" class="text-gray-400 text-lg leading-relaxed"></p>
+                <div id="detail-action-btn"></div>
+            </div>
+        </div>
+
+        <div class="border-t border-white/5 pt-16">
+            <h3 class="text-2xl font-black uppercase italic mb-8">Related <span class="text-[#00D4FF]">Products</span></h3>
+            <div id="related-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+    </div>
+</section>
+    <footer class="py-16 text-center border-t border-white/5">
+        <p class="text-gray-600 text-[10px] font-black uppercase tracking-[0.5em]">© 2025 FF COLLECTIVE DIGITAL AGENCY</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        let cart = [];
+        let total = 0;
+
+        const products = [
+            { id: 1, name: 'Beats Studio Pro', price: 28500, category: 'tech', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', desc: 'Premium Sound. Active Noise Cancelling. Up to 40 hours of battery life. Imported directly from USA.' },
+            { id: 2, name: 'Apple Watch Series 9', price: 48000, category: 'tech', img: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400', desc: 'Smarter. Brighter. Mightier. The most powerful chip in Apple Watch ever.' },
+            { id: 3, name: 'MacBook Air M2', price: 135000, category: 'tech', img: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400', desc: 'Strikingly thin design. Supercharged by M2 chip.' },
+            { id: 4, name: 'Premium Water Flask', price: 3500, category: 'lifestyle', img: 'water flusk.png', desc: 'Vacuum insulated stainless steel Water Bottle with two cups. Keeps drinks Hot And Cool for 24h.Premium matte finish.' },
+            { id: 5, name: 'Minimalist Wallet', price: 2200, category: 'lifestyle', img: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400', desc: 'Slim RFID blocking wallet. High-grade aluminum finish.' }
+        ];
+
+        const specialtyData = {
+            personal: { title: "Personal Shopping", icon: "shopping-cart", desc: "If you see a product on a foreign website, give us the link and we will bring it to you.", waMsg: "Hi, I need help with personal shopping for a link I found." },
+            custom: { title: "Custom Orders", icon: "box", desc: "Contact us for bulk orders or business imports.", waMsg: "Hello, I am interested in bulk/custom business imports." },
+            cargo: { title: "Fast Air Cargo", icon: "plane-takeoff", desc: "Weekly flights from USA & UK ensure 7-12 days delivery.", waMsg: "Hi, I want to know about your air cargo shipping rates." },
+            quality: { title: "Quality Check", icon: "shield-check", desc: "Each product is manually inspected before shipping.", waMsg: "How do you perform the quality check for products?" },
+            support: { title: "24/7 Support", icon: "headphones", desc: "Direct WhatsApp support for all your queries.", waMsg: "Hi, I need some support regarding my inquiry." }
+        };
+
+        function displayProducts(filter = 'all') {
+            const grid = document.getElementById('product-grid');
+            const homeGrid = document.getElementById('home-product-preview');
+            grid.innerHTML = '';
+            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+            filtered.forEach(p => { grid.innerHTML += createProductCard(p); });
+            if(homeGrid) { homeGrid.innerHTML = products.slice(0, 4).map(p => createProductCard(p)).join(''); }
+            lucide.createIcons();
+        }
+
+        function createProductCard(p) {
+            return `
+                <div class="glass p-5 rounded-[2.5rem] flex flex-col group">
+                    <div class="relative overflow-hidden rounded-3xl mb-4">
+                        <img src="${p.img}" class="h-48 w-full object-cover transition duration-500 group-hover:scale-110">
+                    </div>
+                    <h4 class="font-bold text-sm">${p.name}</h4>
+                    <p class="text-[#00D4FF] font-black my-2">৳${p.price.toLocaleString()}</p>
+                    <div class="grid grid-cols-2 gap-2 mt-auto">
+                        <button onclick="showProductDetails(${p.id})" class="bg-white/5 hover:bg-white/10 py-3 rounded-xl text-[9px] font-bold uppercase border border-white/5 transition">Details</button>
+                        <button onclick="addToCart('${p.name}', ${p.price})" class="bg-[#00D4FF] text-black py-3 rounded-xl text-[9px] font-bold uppercase transition">Add</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterProducts(cat) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-${cat}`).classList.add('active');
+            displayProducts(cat);
+        }
+function searchProducts() {
+    const searchTerm = document.getElementById('product-search').value.toLowerCase();
+    const grid = document.getElementById('product-grid');
+    
+   
+    const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchTerm) || 
+        p.category.toLowerCase().includes(searchTerm) ||
+        p.desc.toLowerCase().includes(searchTerm)
+    );
+
+    
+    grid.innerHTML = '';
+    if (filtered.length > 0) {
+        filtered.forEach(p => {
+            grid.innerHTML += createProductCard(p);
+        });
+    } else {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 font-bold uppercase tracking-widest text-xs">No products found matching "${searchTerm}"</div>`;
+    }
+    
+   
+    lucide.createIcons();
+}
+        function showProductDetails(id) {
+   
+    const product = products.find(p => p.id === id);
+    
+   
+    document.getElementById('detail-name').innerText = product.name;
+    document.getElementById('detail-price').innerText = "৳" + product.price.toLocaleString();
+    document.getElementById('detail-desc').innerText = product.desc;
+    document.getElementById('detail-img').src = product.img;
+    
+    document.getElementById('detail-action-btn').innerHTML = `
+        <button onclick="addToCart('${product.name}', ${product.price})" class="w-full md:w-auto bg-[#00D4FF] text-black px-12 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-cyan-500/20">
+            Add to Cart
+        </button>
+    `;
+
+   
+    const relatedGrid = document.getElementById('related-products-grid');
+    relatedGrid.innerHTML = '';
+    
+
+    const related = products.filter(p => p.category === product.category && p.id !== product.id);
+    
+    related.forEach(p => {
+        relatedGrid.innerHTML += createProductCard(p); 
+    });
+
+    
+    lucide.createIcons();
+    navigateTo('product-details');
+    window.scrollTo(0, 0); 
+}
+
+        function openSpecialtyModal(key) {
+            const data = specialtyData[key];
+            document.getElementById('spec-title').innerText = data.title;
+            document.getElementById('spec-desc').innerText = data.desc;
+            document.getElementById('spec-icon').innerHTML = `<i data-lucide="${data.icon}" size="64"></i>`;
+            lucide.createIcons();
+            document.getElementById('spec-wa-btn').onclick = () => window.open(`https://wa.me/8801700949457?text=${encodeURIComponent(data.waMsg)}`, '_blank');
+            document.getElementById('specialty-modal').classList.remove('hidden');
+        }
+
+        function closeSpecialtyModal() { document.getElementById('specialty-modal').classList.add('hidden'); }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-section'));
+            document.getElementById('page-' + pageId).classList.add('active-section');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            const btn = document.getElementById('btn-' + pageId);
+            if(btn) btn.classList.add('nav-active');
+            window.scrollTo(0,0);
+        }
+
+        let orderTimer;
+        let timeLeft = 5;
+
+        function addToCart(name, price) {
+   
+    const existingItem = cart.find(item => item.name === name);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({ name, price, quantity: 1 });
+    }
+
+    total += price;
+    updateUI();
+    showOrderTimer(); 
+}
+
+        function showOrderTimer() {
+    const modal = document.getElementById('order-timer-modal');
+    const timerText = document.getElementById('timer-number');
+    const progressCircle = document.getElementById('timer-progress');
+    
+    modal.classList.remove('hidden');
+    timeLeft = 5; 
+    timerText.innerText = timeLeft;
+
+    clearInterval(orderTimer);
+    orderTimer = setInterval(() => {
+        timeLeft--;
+        timerText.innerText = timeLeft;
+        
+        
+        const progress = (timeLeft / 5) * 100; 
+        progressCircle.setAttribute('stroke-dasharray', `${progress}, 100`);
+
+        if (timeLeft <= 0) {
+            clearInterval(orderTimer);
+            navigateTo('checkout'); 
+            modal.classList.add('hidden');
+        }
+    }, 1000);
+}
+       
+function showCustomPopup(message, type = 'alert', onConfirm = null) {
+    const modal = document.getElementById('custom-popup');
+    const msgElem = document.getElementById('popup-message');
+    const btnContainer = document.getElementById('popup-buttons');
+    
+    msgElem.innerText = message;
+    btnContainer.innerHTML = ''; 
+    modal.classList.remove('hidden');
+
+    if (type === 'confirm') {
+        btnContainer.innerHTML = `
+            <button onclick="closePopup()" class="flex-1 py-4 bg-white/5 text-white rounded-2xl font-bold uppercase text-[10px] border border-white/10 hover:bg-white/10 transition">No, Back</button>
+            <button id="popup-confirm-btn" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold uppercase text-[10px] shadow-lg shadow-red-600/20">Yes, Clear</button>
+        `;
+        document.getElementById('popup-confirm-btn').onclick = () => {
+            if(onConfirm) onConfirm();
+            closePopup();
+        };
+    } else {
+        btnContainer.innerHTML = `
+            <button onclick="closePopup()" class="w-full py-4 bg-[#00D4FF] text-black rounded-2xl font-bold uppercase text-[10px] hover:bg-white transition">Got It</button>
+        `;
+    }
+}
+
+function closePopup() {
+    document.getElementById('custom-popup').classList.add('hidden');
+}
+       function cancelOrderTimer() {
+    clearInterval(orderTimer);
+    document.getElementById('order-timer-modal').classList.add('hidden');
+    
+    if (cart.length > 0) {
+        cart.pop();
+        total = 0; 
+        updateUI();
+        showCustomPopup("Item removed from your cart.");
+    }
+}
+        
+function cancelFullOrder() {
+    showCustomPopup("Are you sure you want to clear your cart?", "confirm", () => {
+        cart = [];
+        total = 0;
+        updateUI();
+        navigateTo('home');
+       
+        setTimeout(() => showCustomPopup("Order cleared successfully!"), 300);
+    });
+
+}
+        function updateUI() {
+    const deliveryCharge = parseInt(document.querySelector('input[name="location"]:checked').value);
+    const grandTotal = total + deliveryCharge;
+
+    document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    let listHTML = cart.length === 0 ? "No items" : 
+        cart.map((item, index) => `
+            <div class="flex justify-between items-center mb-4 bg-white/5 p-3 rounded-xl">
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm">${item.name}</span>
+                    <span class="text-xs text-gray-400">৳${item.price.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="changeQuantity(${index}, -1)" class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-red-500/20 transition">-</button>
+                    
+                    <span class="font-bold text-[#00D4FF]">${item.quantity}</span>
+                    
+                    <button onclick="changeQuantity(${index}, 1)" class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-green-500/20 transition">+</button>
+                </div>
+            </div>
+        `).join('');
+
+    if(cart.length > 0) {
+        listHTML += `
+            <div class="flex justify-between border-t border-white/10 pt-4 mt-2 italic text-gray-400">
+                <span>Delivery Charge</span>
+                <span>৳${deliveryCharge}</span>
+            </div>`;
+    }
+
+    document.getElementById('checkout-list').innerHTML = listHTML;
+    document.getElementById('checkout-total').innerText = "৳" + grandTotal.toLocaleString();
+}
+function changeQuantity(index, delta) {
+    const item = cart[index];
+    
+    if (delta === 1) {
+       
+        item.quantity += 1;
+        total += item.price;
+    } else {
+        
+        if (item.quantity > 1) {
+            item.quantity -= 1;
+            total -= item.price;
+        } else {
+           
+            total -= item.price;
+            cart.splice(index, 1);
+        }
+    }
+    
+    updateUI();
+}
+
+   function processOrder() {
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const addr = document.getElementById('cust-addr').value;
+    const txnId = document.getElementById('cust-txnid')?.value || "N/A";
+    const method = document.querySelector('input[name="pay-method"]:checked').value;
+    
+    const deliveryCharge = parseInt(document.querySelector('input[name="location"]:checked').value);
+    const grandTotal = total + deliveryCharge;
+
+    if(!name || !phone || !addr || cart.length === 0) {
+        showCustomPopup("Please fill all details!"); 
+        return;
+    }
+
+    
+    if(method !== "COD" && (txnId === "N/A" || !txnId)) {
+        showCustomPopup(`Please provide Transaction ID for ${method} payment!`);
+        return;
+    }
+
+    const itemsText = cart.map((i, idx) => `${idx + 1}. ${i.name} [x${i.quantity}]`).join('\n');
+    
+    const message = `🚀 *NEW ORDER RECEIVED* 🚀\n` +
+                    `👤 *Name:* ${name}\n` +
+                    `📞 *Phone:* ${phone}\n` +
+                    `📍 *Address:* ${addr}\n` +
+                    `--------------------------\n` +
+                    `💳 *Payment Method:* ${method}\n` +
+                    (method !== "COD" ? `🆔 *Txn ID:* ${txnId}\n` : `📝 *Note:* Pay on Delivery\n`) +
+                    `--------------------------\n` +
+                    `🛒 *Items:* \n${itemsText}\n` +
+                    `--------------------------\n` +
+                    `💵 *Product Total:* ৳${total.toLocaleString()}\n` +
+                    `🚚 *Delivery Charge:* ৳${deliveryCharge}\n` +
+                    `💰 *Grand Total:* ৳${grandTotal.toLocaleString()}\n\n` +
+                    `✅ Order confirmation requested.`;
+
+    window.open(`https://wa.me/8801700949457?text=${encodeURIComponent(message)}`, '_blank');
+}
+       // Typing text animation
+        const typingTextElement = document.getElementById('typing-text');
+        
+const phrases = [
+    "Premium gadgets & lifestyle items from USA, UK & Japan.",
+    "100% authentic products at your doorstep.",
+    "Experience fast and reliable global imports.",
+    "Search for your favorite gadgets now!" 
+];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function typeWriter() {
+            const currentPhrase = phrases[phraseIndex];
+            if (isDeleting) {
+                typingTextElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingTextElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = 65; // typing speed
+            if (isDeleting) typeSpeed /= 2; // faster deleting
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                typeSpeed = 1500; // pause at end of phrase
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typeSpeed = 500; // pause before typing next phrase
+            }
+
+            setTimeout(typeWriter, typeSpeed);
+        }
+
+function openReviewModal() {
+    document.getElementById('review-modal').classList.remove('hidden');
+    if(window.lucide) lucide.createIcons();
+}
+
+
+function closeReviewModal() {
+    document.getElementById('review-modal').classList.add('hidden');
+}
+
+
+function sendReview() {
+    const name = document.getElementById('rev-name').value;
+    const rating = document.getElementById('rev-rating').value;
+    const msg = document.getElementById('rev-message').value;
+    
+   
+    const productName = document.getElementById('detail-name')?.innerText || "Product";
+
+    if(!name || !msg) {
+        alert("Please fill name and message!");
+        return;
+    }
+
+    const stars = "⭐".repeat(rating);
+    const whatsappMessage = `📝 *NEW PRODUCT REVIEW* 📝%0A%0A📦 *Product:* ${productName}%0A👤 *Name:* ${name}%0A⭐ *Rating:* ${stars}%0A💬 *Review:* ${msg}`;
+    
+    
+    window.open(`https://wa.me/8801700949457?text=${whatsappMessage}`, '_blank');
+    
+    closeReviewModal();
+}
+        // Call typeWriter when the page loads
+        window.onload = () => {
+            displayProducts();
+            typeWriter(); // Start typing animation
+        };
+        document.querySelectorAll('input[name="pay-method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const txnInputContainer = document.getElementById('cust-txnid').parentElement;
+        if (this.value === "COD") {
+            txnInputContainer.style.display = "none"; 
+        } else {
+            txnInputContainer.style.display = "block"; 
+        }
+    });
+});
+    
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.setAttribute('data-lucide', 'x'); 
+            } else {
+                menu.classList.add('hidden');
+                icon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); 
+        }
+      -function homeSearch(event) {
+    const searchTerm = document.getElementById('home-search').value.toLowerCase();
+    
+    
+    if (event.key === 'Enter' || searchTerm.length > 2) {
+        
+        navigateTo('shop');
+        
+    
+        const shopSearchInput = document.getElementById('product-search');
+        if (shopSearchInput) {
+            shopSearchInput.value = searchTerm;
+          
+            searchProducts(); 
+        }
+    }
+
+}
+    </script>
+</body>
+    </script>
+    <div id="custom-popup" class="hidden fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass p-8 rounded-[2rem] text-center max-w-sm w-full border border-white/10 shadow-2xl">
+        <h3 id="popup-title" class="text-xl font-bold mb-2 text-[#00D4FF]">Hub Notification</h3>
+        <p id="popup-message" class="text-gray-400 text-sm mb-8 leading-relaxed"></p>
+        <div id="popup-buttons" class="flex gap-3">
+            </div>
+    </div>
+</div>
+<div id="review-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
+    <div class="glass p-8 rounded-[2.5rem] max-w-md w-full border border-white/10 relative shadow-2xl">
+        <button onclick="closeReviewModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white">
+            <i data-lucide="x"></i>
+        </button>
+        <h3 class="text-2xl font-black uppercase italic mb-6">Submit Your <span class="text-[#00D4FF]">Review</span></h3>
+        <div class="space-y-4">
+            <input id="rev-name" type="text" placeholder="Your Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]">
+            <select id="rev-rating" class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-2xl text-white outline-none">
+                <option value="5">⭐⭐⭐⭐⭐ (5 Star)</option>
+                <option value="4">⭐⭐⭐⭐ (4 Star)</option>
+                <option value="3">⭐⭐⭐ (3 Star)</option>
+                <option value="2">⭐⭐ (2 Star)</option>
+                <option value="1">⭐ (1 Star)</option>
+            </select>
+            <textarea id="rev-message" rows="4" placeholder="How was the product?" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]"></textarea>
+            <button onclick="sendReview()" class="w-full bg-[#00D4FF] text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:shadow-lg transition-all">Send via WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
