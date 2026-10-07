@@ -354,6 +354,8 @@
                 <div class="space-y-3">
                     <input id="cust-name" type="text" placeholder="Full Name"
                         class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF] transition">
+                    <input id="cust-email" type="email" placeholder="Email Address"
+                        class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF] transition">
                     <input id="cust-phone" type="text" placeholder="Phone Number"
                         class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-xl outline-none focus:border-[#00D4FF] transition">
                     <textarea id="cust-addr" placeholder="Full Delivery Address"
@@ -499,44 +501,45 @@
     </footer>
 
 
-    
-<div id="custom-popup"
-    class="hidden fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="glass p-8 rounded-[2rem] text-center max-w-sm w-full border border-white/10 shadow-2xl">
-        <h3 id="popup-title" class="text-xl font-bold mb-2 text-[#00D4FF]">Hub Notification</h3>
-        <p id="popup-message" class="text-gray-400 text-sm mb-8 leading-relaxed"></p>
-        <div id="popup-buttons" class="flex gap-3">
+
+    <div id="custom-popup"
+        class="hidden fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="glass p-8 rounded-[2rem] text-center max-w-sm w-full border border-white/10 shadow-2xl">
+            <h3 id="popup-title" class="text-xl font-bold mb-2 text-[#00D4FF]">Hub Notification</h3>
+            <p id="popup-message" class="text-gray-400 text-sm mb-8 leading-relaxed"></p>
+            <div id="popup-buttons" class="flex gap-3">
+            </div>
         </div>
     </div>
-</div>
-<div id="review-modal"
-    class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
-    <div class="glass p-8 rounded-[2.5rem] max-w-md w-full border border-white/10 relative shadow-2xl">
-        <button onclick="closeReviewModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white">
-            <i data-lucide="x"></i>
-        </button>
-        <h3 class="text-2xl font-black uppercase italic mb-6">Submit Your <span class="text-[#00D4FF]">Review</span>
-        </h3>
-        <div class="space-y-4">
-            <input id="rev-name" type="text" placeholder="Your Name"
-                class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]">
-            <select id="rev-rating"
-                class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-2xl text-white outline-none">
-                <option value="5">⭐⭐⭐⭐⭐ (5 Star)</option>
-                <option value="4">⭐⭐⭐⭐ (4 Star)</option>
-                <option value="3">⭐⭐⭐ (3 Star)</option>
-                <option value="2">⭐⭐ (2 Star)</option>
-                <option value="1">⭐ (1 Star)</option>
-            </select>
-            <textarea id="rev-message" rows="4" placeholder="How was the product?"
-                class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]"></textarea>
-            <button onclick="sendReview()"
-                class="w-full bg-[#00D4FF] text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:shadow-lg transition-all">Send
-                via WhatsApp</button>
+    <div id="review-modal"
+        class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
+        <div class="glass p-8 rounded-[2.5rem] max-w-md w-full border border-white/10 relative shadow-2xl">
+            <button onclick="closeReviewModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white">
+                <i data-lucide="x"></i>
+            </button>
+            <h3 class="text-2xl font-black uppercase italic mb-6">Submit Your <span class="text-[#00D4FF]">Review</span>
+            </h3>
+            <div class="space-y-4">
+                <input id="rev-name" type="text" placeholder="Your Name"
+                    class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]">
+                <select id="rev-rating"
+                    class="w-full bg-[#0B0F1A] border border-white/10 p-4 rounded-2xl text-white outline-none">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 Star)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 Star)</option>
+                    <option value="3">⭐⭐⭐ (3 Star)</option>
+                    <option value="2">⭐⭐ (2 Star)</option>
+                    <option value="1">⭐ (1 Star)</option>
+                </select>
+                <textarea id="rev-message" rows="4" placeholder="How was the product?"
+                    class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-[#00D4FF]"></textarea>
+                <button onclick="sendReview()"
+                    class="w-full bg-[#00D4FF] text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:shadow-lg transition-all">Send
+                    via WhatsApp</button>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
